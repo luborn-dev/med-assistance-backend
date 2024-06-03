@@ -21,7 +21,7 @@ async def get_procedures_collection():
 
 async def add_procedure(procedure_data: dict) -> dict:
     # Convertemos a data para string antes de salvar
-    procedure_data["birthdate"] = procedure_data["birthdate"].isoformat()
+    procedure_data["birthdate"] = procedure_data["birthdate"].format()
     procedures_collection = await get_procedures_collection()
     procedure = await procedures_collection.insert_one(procedure_data)
     new_procedure = await procedures_collection.find_one({"_id": procedure.inserted_id})

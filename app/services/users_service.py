@@ -33,3 +33,11 @@ async def authenticate_user(email: str, password: str):
     if user and pwd_context.verify(password, user["password"]):
         return user_helper(user)
     return None
+
+
+async def update_user_password(email: str, new_password: str):
+    pacientes_collection = await get_pacientes_collection()
+    hashed_password = pwd_context.hash(new_password)
+    await pacientes_collection.update_one(
+        {"email": email}, {"$set": {"password": hashed_password}}
+    )

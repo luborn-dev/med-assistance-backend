@@ -1,14 +1,17 @@
-# database.py
+import os
+
+from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import Field
 from pydantic_settings import BaseSettings
+
+# Carregar variáveis de ambiente do arquivo .env
+load_dotenv()
 
 
 class Settings(BaseSettings):
-    MONGODB_URL: str = "mongodb://localhost:27017/"
-    DATABASE_NAME: str = "medassistance"
-
-    class Config:
-        env_file = ".env"
+    MONGODB_URL: str = Field(..., env="MONGODB_URL")
+    DATABASE_NAME: str = Field(..., env="DATABASE_NAME")
 
 
 settings = Settings()

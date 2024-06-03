@@ -2,12 +2,12 @@ import os
 from pathlib import Path
 
 import speech_recognition as sr
-from fastapi import APIRouter, Body, File, HTTPException, UploadFile
+from fastapi import APIRouter, Body, File, Form, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 from pydub import AudioSegment
 
 from app.models.procedure_model import ProcedureModel
-from app.services.procedures_service import add_procedure
+from app.services.procedures_service import add_procedure, get_procedures_collection
 
 router = APIRouter()
 
@@ -17,15 +17,21 @@ if not UPLOAD_DIR.exists():
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
-@router.post("/api/procedures", response_description="Adicionar novo procedimento")
+@router.post("/api/procedures", response_description="Add new procedure")
 async def create_procedure(procedure: ProcedureModel = Body(...)):
     procedure = procedure.model_dump()
     new_procedure = await add_procedure(procedure)
     return new_procedure
 
 
-@router.post("/api/procedures/upload", response_description="Carregando uma gravação")
-async def upload_recording(file: UploadFile = File(...)):
+@router.post("/api/procedures/upload", response_description="Upload a recording")
+async def upload_recording(
+    procedure_type: str = Form(...),
+    patient_name: str = Form(...),
+    exact_procedure_name: str = Form(...),
+    birthdate: str = Form(...),
+    file: UploadFile = File(...),
+):
     accepted_file_types = [
         "audio/mpeg",
         "audio/mp4",
@@ -37,7 +43,7 @@ async def upload_recording(file: UploadFile = File(...)):
 
     if file.content_type not in accepted_file_types:
         raise HTTPException(
-            status_code=400, detail=f"Tipo de arquivo inválido: {file.content_type}"
+            status_code=400, detail=f"Invalid file type: {file.content_type}"
         )
 
     file_location = UPLOAD_DIR / file.filename
@@ -47,7 +53,7 @@ async def upload_recording(file: UploadFile = File(...)):
 
     # Verifique se o arquivo foi salvo corretamente
     if not file_location.exists():
-        raise HTTPException(status_code=500, detail="O arquivo não pôde ser salvo")
+        raise HTTPException(status_code=500, detail="File could not be saved")
 
     # Convert the audio file to wav format for recognition
     try:
@@ -55,7 +61,7 @@ async def upload_recording(file: UploadFile = File(...)):
         wav_location = file_location.with_suffix(".wav")
         audio.export(wav_location, format="wav")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao converter arquivo: {e}")
+        raise HTTPException(status_code=500, detail=f"Error converting file: {e}")
 
     # Perform speech-to-text
     recognizer = sr.Recognizer()
@@ -64,15 +70,35 @@ async def upload_recording(file: UploadFile = File(...)):
         with sr.AudioFile(str(wav_location)) as source:
             audio_data = recognizer.record(source)
             text = recognizer.recognize_google(audio_data, language="pt-BR")
-            print(f"Transcrição: {text}")
+            print(f"Transcription: {text}")
     except sr.UnknownValueError:
-        print("O reconhecimento de fala do Google não conseguiu entender o áudio")
+        print("Google Speech Recognition could not understand audio")
     except sr.RequestError as e:
-        print(
-            f"Não foi possível solicitar resultados do serviço Google Speech Recognition; {e}"
-        )
+        print(f"Could not request results from Google Speech Recognition service; {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error during transcription: {e}")
+
+    # Salvar a transcrição e os dados do procedimento no banco de dados
+    procedure_data = {
+        "procedure_type": procedure_type,
+        "patient_name": patient_name,
+        "exact_procedure_name": exact_procedure_name,
+        "birthdate": birthdate,
+        "transcription": text,
+    }
+    print(
+        "procedure_type",
+        procedure_type,
+        "patient_name",
+        patient_name,
+        "exact_procedure_name",
+        exact_procedure_name,
+        "birthdate",
+        birthdate,
+        "transcription",
+        text,
+    )
+    new_procedure = await add_procedure(procedure_data)
 
     return JSONResponse(
         content={
@@ -80,5 +106,6 @@ async def upload_recording(file: UploadFile = File(...)):
             "content_type": file.content_type,
             "saved_location": str(file_location),
             "transcription": text,
+            "procedure": new_procedure,
         }
     )

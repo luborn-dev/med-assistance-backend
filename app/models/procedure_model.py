@@ -10,7 +10,7 @@ class ProcedureModel(BaseModel):
     birthdate: date
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "procedure_type": "Cirurgia",
                 "patient_name": "João Silva",
@@ -21,5 +21,5 @@ class ProcedureModel(BaseModel):
 
     def dict(self, *args, **kwargs):
         d = super().dict(*args, **kwargs)
-        d["birthdate"] = d["birthdate"].isoformat()  # Converte para string
+        d["birthdate"] = d["birthdate"].format()  # Converte para string
         return d
