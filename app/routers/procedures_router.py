@@ -29,7 +29,6 @@ async def upload_recording(
     procedure_type: str = Form(...),
     patient_name: str = Form(...),
     exact_procedure_name: str = Form(...),
-    birthdate: str = Form(...),
     file: UploadFile = File(...),
 ):
     accepted_file_types = [
@@ -83,21 +82,9 @@ async def upload_recording(
         "procedure_type": procedure_type,
         "patient_name": patient_name,
         "exact_procedure_name": exact_procedure_name,
-        "birthdate": birthdate,
         "transcription": text,
     }
-    print(
-        "procedure_type",
-        procedure_type,
-        "patient_name",
-        patient_name,
-        "exact_procedure_name",
-        exact_procedure_name,
-        "birthdate",
-        birthdate,
-        "transcription",
-        text,
-    )
+
     new_procedure = await add_procedure(procedure_data)
 
     return JSONResponse(

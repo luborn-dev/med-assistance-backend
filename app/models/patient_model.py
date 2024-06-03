@@ -9,6 +9,7 @@ class PatientModel(BaseModel):
     address: str = Field(..., example="Rua das Flores, 123")
     cpf: str = Field(..., example="123.456.789-00")
     phone: str = Field(..., example="(12) 34567-8901")
+    doctor_id: str = Field(..., example="29329392929")
 
     class Config:
         json_schema_extra = {
@@ -18,5 +19,6 @@ class PatientModel(BaseModel):
                 "address": "Rua das Flores, 123",
                 "cpf": "123.456.789-00",
                 "phone": "(12) 34567-8901",
+                "doctor_id": "29329392929",
             }
         }

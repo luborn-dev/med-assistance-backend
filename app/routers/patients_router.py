@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Body, HTTPException, status
+from fastapi import APIRouter, Body, HTTPException, Query, status
 
 from app.models.patient_model import PatientModel
 from app.services.patients_service import (
@@ -8,6 +8,7 @@ from app.services.patients_service import (
     delete_patient,
     get_all_patients,
     get_patient,
+    get_patients_by_doctor_id,
     update_patient,
 )
 
@@ -44,6 +45,16 @@ async def read_patient(id: str):
 )
 async def read_all_patients():
     patients = await get_all_patients()
+    return patients
+
+
+@router.get(
+    "/api/patients/",
+    response_description="Get patients by doctor ID",
+    response_model=List[PatientModel],
+)
+async def read_patients_by_doctor_id(doctor_id: str = Query(...)):
+    patients = await get_patients_by_doctor_id(doctor_id)
     return patients
 
 

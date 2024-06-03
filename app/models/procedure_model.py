@@ -15,7 +15,6 @@ class ProcedureModel(BaseModel):
                 "procedure_type": "Cirurgia",
                 "patient_name": "João Silva",
                 "exact_procedure_name": "Cirurgia de Apendicite",
-                "birthdate": "1980-01-01",
             }
         }
 
