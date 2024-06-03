@@ -1,13 +1,11 @@
-from datetime import date
-
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class ProcedureModel(BaseModel):
     procedure_type: str
     patient_name: str
     exact_procedure_name: str
-    birthdate: date
+    doctor_id: str
 
     class Config:
         json_schema_extra = {
@@ -15,10 +13,6 @@ class ProcedureModel(BaseModel):
                 "procedure_type": "Cirurgia",
                 "patient_name": "João Silva",
                 "exact_procedure_name": "Cirurgia de Apendicite",
+                "doctor_id": "29329392929",
             }
         }
-
-    def dict(self, *args, **kwargs):
-        d = super().dict(*args, **kwargs)
-        d["birthdate"] = d["birthdate"].format()  # Converte para string
-        return d

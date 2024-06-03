@@ -24,32 +24,7 @@ async def create_patient(patient: PatientModel = Body(...)):
 
 
 @router.get(
-    "/api/patients/{id}",
-    response_description="Get a single patient",
-    response_model=PatientModel,
-)
-async def read_patient(id: str):
-    patient = await get_patient(id)
-    if patient is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Patient with ID {id} not found",
-        )
-    return patient
-
-
-@router.get(
     "/api/patients",
-    response_description="Get all patients",
-    response_model=List[PatientModel],
-)
-async def read_all_patients():
-    patients = await get_all_patients()
-    return patients
-
-
-@router.get(
-    "/api/patients/",
     response_description="Get patients by doctor ID",
     response_model=List[PatientModel],
 )

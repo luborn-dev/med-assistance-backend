@@ -7,7 +7,12 @@ from fastapi.responses import JSONResponse
 from pydub import AudioSegment
 
 from app.models.procedure_model import ProcedureModel
-from app.services.procedures_service import add_procedure, get_procedures_collection
+from app.services.procedures_service import (
+    add_procedure,
+    delete_procedure_by_id,
+    get_all_procedures,
+    get_procedures_collection,
+)
 
 router = APIRouter()
 
@@ -15,6 +20,15 @@ UPLOAD_DIR = Path.home() / "recordings"
 
 if not UPLOAD_DIR.exists():
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+
+@router.get("/api/procedures", response_description="Get all procedures")
+async def get_procedures(doctor_id: str = None):
+    procedures = await get_all_procedures(doctor_id)
+
+    if procedures:
+        return procedures
+    raise HTTPException(status_code=404, detail="No procedures found")
 
 
 @router.post("/api/procedures", response_description="Add new procedure")
@@ -29,6 +43,7 @@ async def upload_recording(
     procedure_type: str = Form(...),
     patient_name: str = Form(...),
     exact_procedure_name: str = Form(...),
+    doctor_id: str = Form(...),
     file: UploadFile = File(...),
 ):
     accepted_file_types = [
@@ -82,6 +97,7 @@ async def upload_recording(
         "procedure_type": procedure_type,
         "patient_name": patient_name,
         "exact_procedure_name": exact_procedure_name,
+        "doctorId": doctor_id,
         "transcription": text,
     }
 
@@ -92,7 +108,22 @@ async def upload_recording(
             "filename": file.filename,
             "content_type": file.content_type,
             "saved_location": str(file_location),
+            "doctorId": doctor_id,
             "transcription": text,
             "procedure": new_procedure,
         }
     )
+
+
+@router.delete(
+    "/api/procedures/{procedure_id}", response_description="Delete a procedure"
+)
+async def delete_procedure(procedure_id: str):
+    delete_result = await delete_procedure_by_id(procedure_id)
+
+    if delete_result.deleted_count == 1:
+        return JSONResponse(
+            status_code=200, content={"message": "Procedure deleted successfully"}
+        )
+    else:
+        raise HTTPException(status_code=404, detail="Procedure not found")
