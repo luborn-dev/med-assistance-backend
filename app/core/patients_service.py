@@ -3,7 +3,7 @@ from datetime import date, datetime
 from bson import ObjectId
 
 from app.config.database import db
-from app.models.patient_model import PatientModel
+from app.models.patient import PatientModel
 
 
 async def get_patients_collection():
@@ -18,9 +18,7 @@ def patient_helper(patient) -> dict:
         "address": patient["address"],
         "cpf": patient["cpf"],
         "phone": patient["phone"],
-        "doctor_id": patient[
-            "doctor_id"
-        ],  # Certifique-se de que doctor_id esteja incluído no schema do paciente
+        "doctor_id": patient["doctor_id"],
     }
 
 

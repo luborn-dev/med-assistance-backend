@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.database import db
-from app.routers import patients_router, procedures_router, users_router
+from app.routers import patients, procedure, summarize, users
 
 origins = ["*"]
 
@@ -23,6 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(procedures_router.router)
-app.include_router(users_router.router)
-app.include_router(patients_router.router)
+app.include_router(procedure.router)
+app.include_router(users.router)
+app.include_router(patients.router)
+app.include_router(summarize.router)

@@ -6,12 +6,11 @@ from fastapi import APIRouter, Body, File, Form, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 from pydub import AudioSegment
 
-from app.models.procedure_model import ProcedureModel
+from app.models.procedure import ProcedureModel
 from app.services.procedures_service import (
     add_procedure,
     delete_procedure_by_id,
     get_all_procedures,
-    get_procedures_collection,
 )
 
 router = APIRouter()
@@ -65,11 +64,9 @@ async def upload_recording(
     with open(file_location, "wb") as f:
         f.write(await file.read())
 
-    # Verifique se o arquivo foi salvo corretamente
     if not file_location.exists():
         raise HTTPException(status_code=500, detail="File could not be saved")
 
-    # Convert the audio file to wav format for recognition
     try:
         audio = AudioSegment.from_file(str(file_location))
         wav_location = file_location.with_suffix(".wav")
@@ -77,7 +74,6 @@ async def upload_recording(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error converting file: {e}")
 
-    # Perform speech-to-text
     recognizer = sr.Recognizer()
     text = ""
     try:
@@ -92,7 +88,6 @@ async def upload_recording(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error during transcription: {e}")
 
-    # Salvar a transcrição e os dados do procedimento no banco de dados
     procedure_data = {
         "procedure_type": procedure_type,
         "patient_name": patient_name,

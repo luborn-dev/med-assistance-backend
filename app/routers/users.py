@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body, HTTPException
 
-from app.models.user_model import LoginSchema, UpdatePasswordSchema, UserSchema
+from app.models.user import LoginSchema, UpdatePasswordSchema, UserSchema
 from app.services.users_service import add_user, authenticate_user, update_user_password
 
 router = APIRouter()

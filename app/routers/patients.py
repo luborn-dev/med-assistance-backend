@@ -2,11 +2,10 @@ from typing import List
 
 from fastapi import APIRouter, Body, HTTPException, Query, status
 
-from app.models.patient_model import PatientModel
+from app.models.patient import PatientModel
 from app.services.patients_service import (
     add_patient,
     delete_patient,
-    get_all_patients,
     get_patient,
     get_patients_by_doctor_id,
     update_patient,

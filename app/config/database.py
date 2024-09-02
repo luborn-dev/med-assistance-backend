@@ -5,7 +5,6 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
-# Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
 
 
