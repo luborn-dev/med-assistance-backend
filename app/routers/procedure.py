@@ -6,12 +6,12 @@ from fastapi import APIRouter, Body, File, Form, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 from pydub import AudioSegment
 
-from app.models.procedure import ProcedureModel
-from app.services.procedures_service import (
+from app.core.procedures_service import (
     add_procedure,
     delete_procedure_by_id,
     get_all_procedures,
 )
+from app.models.procedure import ProcedureModel
 
 router = APIRouter()
 

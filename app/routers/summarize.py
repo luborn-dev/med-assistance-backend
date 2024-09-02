@@ -4,8 +4,8 @@ from typing import List
 from fastapi import APIRouter, Body, HTTPException, Query, status
 from pydantic import BaseModel
 
+from app.core.summarize_service import summarize_transcription
 from app.models.patient import PatientModel
-from app.services.summarize_service import summarize_transcription
 
 
 class SummarizeRequest(BaseModel):
