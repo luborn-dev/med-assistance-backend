@@ -11,7 +11,9 @@ from app.core.procedures_service import (
     delete_procedure_by_id,
     get_all_procedures,
 )
+from app.core.summarize_service import summarize_transcription
 from app.models.procedure import ProcedureModel
+from app.utils.pre_processing_summarize import gerar_prompt_para_sumarizacao
 
 router = APIRouter()
 
@@ -81,6 +83,9 @@ async def upload_recording(
             audio_data = recognizer.record(source)
             text = recognizer.recognize_google(audio_data, language="pt-BR")
             print(f"Transcription: {text}")
+            prompt = gerar_prompt_para_sumarizacao(text)
+            summarize = await summarize_transcription(prompt)
+
     except sr.UnknownValueError:
         print("Google Speech Recognition could not understand audio")
     except sr.RequestError as e:
@@ -94,6 +99,7 @@ async def upload_recording(
         "exact_procedure_name": exact_procedure_name,
         "doctorId": doctor_id,
         "transcription": text,
+        "summarize": summarize,
     }
 
     new_procedure = await add_procedure(procedure_data)
