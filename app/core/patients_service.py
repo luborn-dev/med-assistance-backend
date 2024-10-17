@@ -1,6 +1,7 @@
 from datetime import date, datetime
 
 from bson import ObjectId
+from fastapi import HTTPException
 
 from app.config.database import db
 from app.models.patient import PatientModel
@@ -15,25 +16,26 @@ def patient_helper(patient) -> dict:
         "id": str(patient["_id"]),
         "name": patient["name"],
         "birthdate": str(patient["birthdate"]),
-        "address": patient["address"],
         "cpf": patient["cpf"],
         "phone": patient["phone"],
         "doctor_id": patient["doctor_id"],
     }
 
 
+from datetime import date, datetime
+
+
 async def add_patient(patient_data: dict) -> dict:
     patients_collection = await get_patients_collection()
 
-    # Convertendo a data de nascimento para datetime
-    if "birthdate" in patient_data and isinstance(patient_data["birthdate"], str):
-        patient_data["birthdate"] = datetime.strptime(
-            patient_data["birthdate"], "%Y-%m-%d"
-        )
-    elif "birthdate" in patient_data and isinstance(patient_data["birthdate"], date):
+    if "birthdate" in patient_data and isinstance(patient_data["birthdate"], date):
         patient_data["birthdate"] = datetime.combine(
             patient_data["birthdate"], datetime.min.time()
         )
+
+    # Verifique se o campo 'address' está presente
+    if "address" not in patient_data or not patient_data["address"]:
+        raise HTTPException(status_code=400, detail="Address field is required")
 
     patient = await patients_collection.insert_one(patient_data)
     new_patient = await patients_collection.find_one({"_id": patient.inserted_id})

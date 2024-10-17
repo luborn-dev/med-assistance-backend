@@ -83,15 +83,24 @@ async def upload_recording(
             audio_data = recognizer.record(source)
             text = recognizer.recognize_google(audio_data, language="pt-BR")
             print(f"Transcription: {text}")
-            prompt = gerar_prompt_para_sumarizacao(text)
-            summarize = await summarize_transcription(prompt)
 
     except sr.UnknownValueError:
-        print("Google Speech Recognition could not understand audio")
+        raise HTTPException(
+            status_code=400,
+            detail="Não foi possível entender o áudio. Verifique a qualidade da gravação e tente novamente.",
+        )
     except sr.RequestError as e:
-        print(f"Could not request results from Google Speech Recognition service; {e}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"Serviço de reconhecimento de voz indisponível. Por favor, tente novamente mais tarde.",
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error during transcription: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Ocorreu um erro durante a transcrição: {e}"
+        )
+
+    prompt = gerar_prompt_para_sumarizacao(text)
+    summarize = await summarize_transcription(prompt)
 
     procedure_data = {
         "procedure_type": procedure_type,

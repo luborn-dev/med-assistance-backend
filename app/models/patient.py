@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -6,7 +7,9 @@ from pydantic import BaseModel, Field
 class PatientModel(BaseModel):
     name: str = Field(..., example="João Silva")
     birthdate: date = Field(..., example="1985-12-25")
-    address: str = Field(..., example="Rua das Flores, 123")
+    address: Optional[str] = Field(
+        None, example="Rua das Flores, 123"
+    )  # Tornar opcional
     cpf: str = Field(..., example="123.456.789-00")
     phone: str = Field(..., example="(12) 34567-8901")
     doctor_id: str = Field(..., example="29329392929")
