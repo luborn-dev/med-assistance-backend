@@ -12,7 +12,7 @@ class UserSchema(BaseModel):
     date_creation: Optional[datetime] = datetime.now()
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class LoginSchema(BaseModel):
@@ -27,7 +27,7 @@ class UpdateUserSchema(BaseModel):
     professional_id: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UpdatePasswordSchema(BaseModel):
