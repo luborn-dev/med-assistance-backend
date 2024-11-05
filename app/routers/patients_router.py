@@ -9,7 +9,7 @@ from app.core.patients_service import (
     get_patients_by_doctor_id,
     update_patient,
 )
-from app.models.patient import PatientSchema
+from app.models.patient import PatientSchema, UpdatePatientSchema
 
 router = APIRouter()
 
@@ -53,7 +53,7 @@ async def get_patient_data(id: str):
     response_model=PatientSchema,
 )
 async def update_patient_data(id: str, patient: UpdatePatientSchema = Body(...)):
-    updated = await update_patient(id, patient.dict(exclude_unset=True))
+    updated = await update_patient(id, patient.model_dump(exclude_unset=True))
     if not updated:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found"

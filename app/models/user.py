@@ -23,7 +23,6 @@ class LoginSchema(BaseModel):
 class UpdateUserSchema(BaseModel):
     name: Optional[str]
     email: Optional[EmailStr]
-    password: Optional[str]
     professional_id: Optional[str]
 
     class Config:

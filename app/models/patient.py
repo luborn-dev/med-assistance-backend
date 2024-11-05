@@ -21,7 +21,7 @@ class PatientSchema(BaseModel):
     historico_medico: List[str] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UpdatePatientSchema(BaseModel):
@@ -30,8 +30,7 @@ class UpdatePatientSchema(BaseModel):
     genero: Optional[str]
     cpf: Optional[str]
     endereco: Optional[EnderecoSchema]
-    contato: Optional[ContatoSchema]
     historico_medico: Optional[List[str]]
 
     class Config:
-        orm_mode = True
+        from_attributes = True

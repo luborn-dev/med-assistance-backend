@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config.database import db
 from app.routers import (
     patients_router,
-    procedure_router,
+    procedures_router,
     summarize_router,
     users_router,
 )
@@ -28,7 +28,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(procedure_router.router, prefix="/api")
+app.include_router(procedures_router.router, prefix="/api")
 app.include_router(users_router.router, prefix="/api")
 app.include_router(patients_router.router, prefix="/api")
 app.include_router(summarize_router.router, prefix="/api")
