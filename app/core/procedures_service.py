@@ -80,16 +80,6 @@ def procedure_helper(procedure) -> dict:
     }
 
 
-async def get_procedure_by_paciente_id(paciente_id: str) -> Optional[dict]:
-    procedures_collection = await get_procedures_collection()
-    procedure = await procedures_collection.find_one(
-        {"paciente_id": ObjectId(paciente_id)}
-    )
-    if procedure:
-        return procedure_helper(procedure)
-    return None
-
-
 async def add_gravacao(gravacao_data: dict) -> dict:
     procedures_collection = await get_procedures_collection()
     paciente_id = gravacao_data["paciente_id"]
@@ -117,14 +107,6 @@ async def add_gravacao(gravacao_data: dict) -> dict:
         {"paciente_id": ObjectId(paciente_id)}
     )
     return procedure_helper(updated_procedure)
-
-
-async def add_procedure(procedure_data: dict) -> dict:
-    procedures_collection = await get_procedures_collection()
-    procedure_data["paciente_id"] = ObjectId(procedure_data["paciente_id"])
-    procedure = await procedures_collection.insert_one(procedure_data)
-    new_procedure = await procedures_collection.find_one({"_id": procedure.inserted_id})
-    return procedure_helper(new_procedure)
 
 
 async def get_all_gravacoes_by_paciente_id(paciente_id: str) -> List[dict]:

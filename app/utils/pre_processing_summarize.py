@@ -26,3 +26,21 @@ def gerar_prompt_para_sumarizacao(texto, contexto: str = "procedimentos médicos
         "Abaixo está a transcrição completa do procedimento médico:\n\n"
     )
     return prompt_inicial + texto
+
+
+def gerar_prompt_para_historico_medico(texto, contexto: str = "procedimentos médicos"):
+    prompt_inicial = (
+        f"Atue como um sumarizador especializado em {contexto} com foco em análise abrangente de múltiplos procedimentos médicos. "
+        "Abaixo está a transcrição de diversas consultas e procedimentos realizados. Sua tarefa é gerar um resumo estruturado, "
+        "integrando informações recorrentes e destacando padrões importantes. Não inclua nenhum tipo de interação, comentário, "
+        "ou perguntas direcionadas ao usuário. Apenas forneça o resumo formatado conforme solicitado.\n\n"
+        "Estruture o resumo nas seguintes seções:\n\n"
+        "- **Sintomas e Queixas Repetidas**: Destaque os sintomas e queixas mais frequentemente relatados.\n"
+        "- **Histórico Médico Agregado**: Resuma o histórico médico e as condições crônicas mencionadas ao longo das consultas.\n"
+        "- **Diagnósticos Frequentes**: Liste e descreva os diagnósticos mais comuns e recorrentes entre as transcrições.\n"
+        "- **Tratamentos e Procedimentos Mais Utilizados**: Resuma os principais tratamentos e procedimentos realizados com mais frequência.\n"
+        "- **Recomendações e Acompanhamentos**: Inclua as recomendações gerais, os acompanhamentos sugeridos, e próximos passos comuns.\n\n"
+        "Abaixo estão as transcrições completas de múltiplos procedimentos médicos:\n\n"
+    )
+
+    return prompt_inicial + texto

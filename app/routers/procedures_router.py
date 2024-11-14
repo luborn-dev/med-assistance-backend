@@ -14,6 +14,8 @@ from app.core.procedures_service import (
     get_procedures_collection,
 )
 from app.models.procedure import GravacaoSchema
+from app.utils import pre_processing_summarize
+from app.utils.summarize import summarize_transcription
 
 router = APIRouter()
 
@@ -111,13 +113,21 @@ async def create_gravacao_with_audio(
     if wav_location.exists():
         wav_location.unlink()
 
+    try:
+        prompt = pre_processing_summarize.gerar_prompt_para_sumarizacao(text)
+        summarize = await summarize_transcription(prompt)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Erro ao adicionar gravação: {str(e)}"
+        )
+
     gravacao_data = {
         "paciente_id": paciente_id,
         "medico_id": medico_id,
         "tipo": tipo,
         "procedimento": procedimento,
         "transcricao": text,
-        "sumarizacao": "",
+        "sumarizacao": summarize,
     }
     gravacao = GravacaoSchema(**gravacao_data)
 
