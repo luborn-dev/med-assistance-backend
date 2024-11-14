@@ -1,11 +1,7 @@
-from re import S
-from typing import List
-
-from fastapi import APIRouter, Body, HTTPException, Query, status
+from fastapi import APIRouter, Body
 from pydantic import BaseModel
 
-from app.core.summarize_service import summarize_transcription
-from app.models.patient import PatientSchema
+from app.models.summarize_service import summarize_transcription
 
 
 class SummarizeRequest(BaseModel):

@@ -1,39 +1,43 @@
 from datetime import date, datetime
 
 from bson import ObjectId
-from fastapi import HTTPException
 
 from app.config.database import db
 
 
 async def get_pacientes_collection():
-    return await db.get_collection("pacientes")
+    return await db.get_collection("Pacientes")
+
+
+def mask_cpf(cpf: str) -> str:
+    """Mascarar o CPF no formato 'XXX.XXX.XXX-XX'."""
+    if cpf and len(cpf) == 14:
+        return f"{cpf[:3]}.***.***-{cpf[-2:]}"
+    return cpf
 
 
 def patient_helper(patient) -> dict:
     return {
         "id": str(patient["_id"]),
-        "nome": patient["nome"],
-        "data_nascimento": patient["data_nascimento"].strftime("%Y-%m-%d"),
-        "genero": patient["genero"],
-        "cpf": patient["cpf"],
-        "endereco": patient["endereco"],
-        "data_registro": patient.get("data_registro"),
-        "historico_medico": patient.get("historico_medico", []),
+        "name": patient["name"],
+        "birth_date": patient["birth_date"],
+        "gender": patient["gender"],
+        "cpf": mask_cpf(patient.get("cpf")),
+        "contact": patient["contact"],
+        "address": patient["address"],
+        "register_date": patient.get("register_date"),
     }
 
 
 async def add_patient(patient_data: dict) -> dict:
     patients_collection = await get_pacientes_collection()
 
-    if "data_nascimento" in patient_data and isinstance(
-        patient_data["data_nascimento"], date
-    ):
-        patient_data["data_nascimento"] = datetime.combine(
-            patient_data["data_nascimento"], datetime.min.time()
+    if "birth_date" in patient_data and isinstance(patient_data["birth_date"], date):
+        patient_data["birth_date"] = datetime.combine(
+            patient_data["birth_date"], datetime.min.time()
         )
 
-    patient_data["data_registro"] = datetime.utcnow()
+    patient_data["register_date"] = datetime.now()
 
     patient = await patients_collection.insert_one(patient_data)
     new_patient = await patients_collection.find_one({"_id": patient.inserted_id})
@@ -48,10 +52,11 @@ async def get_patient(id: str) -> dict:
     return None
 
 
-async def get_patients_by_doctor_id(doctor_id: str):
+async def get_all_patients() -> list:
     patients_collection = await get_pacientes_collection()
+    patients_cursor = patients_collection.find()
     patients = []
-    async for patient in patients_collection.find({"medico_id": ObjectId(doctor_id)}):
+    async for patient in patients_cursor:
         patients.append(patient_helper(patient))
     return patients
 
@@ -59,11 +64,9 @@ async def get_patients_by_doctor_id(doctor_id: str):
 async def update_patient(id: str, patient_data: dict):
     patients_collection = await get_pacientes_collection()
 
-    if "data_nascimento" in patient_data and isinstance(
-        patient_data["data_nascimento"], date
-    ):
-        patient_data["data_nascimento"] = datetime.combine(
-            patient_data["data_nascimento"], datetime.min.time()
+    if "birth_date" in patient_data and isinstance(patient_data["birth_date"], date):
+        patient_data["birth_date"] = datetime.combine(
+            patient_data["birth_date"], datetime.min.time()
         )
 
     if not patient_data:

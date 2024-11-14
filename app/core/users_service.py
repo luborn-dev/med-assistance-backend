@@ -3,7 +3,7 @@ import datetime
 from bson import ObjectId
 
 from app.config.database import db
-from app.core.utils.encrypt.password_hash import PasswordHash
+from app.core.utils.password_hash import PasswordHash
 
 pw_hash = PasswordHash()
 

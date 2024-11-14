@@ -1,36 +1,37 @@
 from datetime import date, datetime
-from typing import List, Optional
+from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel
 
 
 class EnderecoSchema(BaseModel):
-    rua: str
-    cidade: str
-    estado: str
+    street: str
+    city: str
+    state: str
     cep: str
+    number: str
 
 
 class PatientSchema(BaseModel):
-    nome: str
-    data_nascimento: date
-    genero: str
+    name: str
+    birth_date: str
+    gender: str
     cpf: str
-    endereco: EnderecoSchema
-    data_registro: Optional[datetime] = datetime.now()
-    historico_medico: List[str] = []
+    contact: str
+    address: EnderecoSchema
+    register_date: Optional[datetime] = datetime.now()
 
     class Config:
         from_attributes = True
 
 
 class UpdatePatientSchema(BaseModel):
-    nome: Optional[str]
-    data_nascimento: Optional[date]
-    genero: Optional[str]
+    name: Optional[str]
+    birth_date: Optional[str]
+    gender: Optional[str]
     cpf: Optional[str]
-    endereco: Optional[EnderecoSchema]
-    historico_medico: Optional[List[str]]
+    contact: Optional[str]
+    address: Optional[EnderecoSchema]
 
     class Config:
         from_attributes = True

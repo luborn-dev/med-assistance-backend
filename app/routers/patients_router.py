@@ -1,12 +1,12 @@
 from typing import List
 
-from fastapi import APIRouter, Body, HTTPException, Query, status
+from fastapi import APIRouter, Body, HTTPException, status
 
 from app.core.patients_service import (
     add_patient,
     delete_patient,
+    get_all_patients,
     get_patient,
-    get_patients_by_doctor_id,
     update_patient,
 )
 from app.models.patient import PatientSchema, UpdatePatientSchema
@@ -14,29 +14,32 @@ from app.models.patient import PatientSchema, UpdatePatientSchema
 router = APIRouter()
 
 
-@router.post(
-    "/patients", response_description="Add new patient", response_model=PatientSchema
-)
+@router.post("/patients", response_description="Add new patient", response_model=dict())
 async def create_patient(patient: PatientSchema = Body(...)):
     try:
-        new_patient = await add_patient(patient.dict())
+        new_patient = await add_patient(patient.model_dump())
         return new_patient
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail="Error creating patient")
 
 
 @router.get(
     "/patients",
-    response_description="Get patients by doctor ID",
-    response_model=List[PatientSchema],
+    response_description="Get patients",
+    response_model=List[dict],
 )
-async def get_patients_by_doctor_id(doctor_id: str = Query(...)):
-    patients = await get_patients_by_doctor_id(doctor_id)
+async def get_all_patients_data(skip: int = 0, limit: int = 10):
+    patients = await get_all_patients()
+    if not patients:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="No patients found"
+        )
     return patients
 
 
 @router.get(
-    "/patients/{id}", response_description="Get a patient", response_model=PatientSchema
+    "/patients/{id}", response_description="Get a patient", response_model=dict()
 )
 async def get_patient_data(id: str):
     patient = await get_patient(id)
@@ -50,7 +53,7 @@ async def get_patient_data(id: str):
 @router.put(
     "/patients/{id}",
     response_description="Update a patient",
-    response_model=PatientSchema,
+    response_model=dict(),
 )
 async def update_patient_data(id: str, patient: UpdatePatientSchema = Body(...)):
     updated = await update_patient(id, patient.model_dump(exclude_unset=True))

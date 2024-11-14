@@ -32,5 +32,5 @@ app.add_middleware(
 app.include_router(procedures_router.router, prefix="/api")
 app.include_router(users_router.router, prefix="/api")
 app.include_router(patients_router.router, prefix="/api")
-app.include_router(summarize_router.router, prefix="/api")
+# app.include_router(summarize_router.router, prefix="/api")
 app.include_router(content_router.router, prefix="/api")
