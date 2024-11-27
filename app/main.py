@@ -1,10 +1,23 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.database import db
-from app.routers import patients, procedure, summarize, users
+from app.routers import (
+    content_router,
+    patients_router,
+    procedures_router,
+    summarize_router,
+    users_router,
+)
 
 origins = ["*"]
+
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
 
 async def lifespan(app: FastAPI):
@@ -23,7 +36,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(procedure.router)
-app.include_router(users.router)
-app.include_router(patients.router)
-app.include_router(summarize.router)
+app.include_router(procedures_router.router, prefix="/api")
+app.include_router(users_router.router, prefix="/api")
+app.include_router(patients_router.router, prefix="/api")
+app.include_router(summarize_router.router, prefix="/api")
+app.include_router(content_router.router, prefix="/api")

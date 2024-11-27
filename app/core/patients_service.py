@@ -1,100 +1,115 @@
+import logging
 from datetime import date, datetime
 
 from bson import ObjectId
-from fastapi import HTTPException
 
 from app.config.database import db
-from app.models.patient import PatientModel
+
+logger = logging.getLogger(__name__)
 
 
-async def get_patients_collection():
+async def get_pacientes_collection():
+    logger.debug("Fetching 'Pacientes' collection from the database.")
     return await db.get_collection("Pacientes")
 
 
+def mask_cpf(cpf: str) -> str:
+    """Mascarar o CPF no formato 'XXX.XXX.XXX-XX'."""
+    logger.debug("Masking CPF.")
+    if cpf and len(cpf) == 14:
+        return f"{cpf[:3]}.***.***-{cpf[-2:]}"
+    return cpf
+
+
 def patient_helper(patient) -> dict:
+    logger.debug(f"Formatting patient data: {patient}")
     return {
         "id": str(patient["_id"]),
         "name": patient["name"],
-        "birthdate": str(patient["birthdate"]),
-        "cpf": patient["cpf"],
-        "phone": patient["phone"],
-        "doctor_id": patient["doctor_id"],
+        "birth_date": patient["birth_date"],
+        "gender": patient["gender"],
+        "cpf": mask_cpf(patient.get("cpf")),
+        "contact": patient["contact"],
+        "address": patient["address"],
+        "register_date": patient.get("register_date"),
     }
 
 
-from datetime import date, datetime
-
-
 async def add_patient(patient_data: dict) -> dict:
-    patients_collection = await get_patients_collection()
+    logger.info("Adding a new patient.")
+    patients_collection = await get_pacientes_collection()
 
-    if "birthdate" in patient_data and isinstance(patient_data["birthdate"], date):
-        patient_data["birthdate"] = datetime.combine(
-            patient_data["birthdate"], datetime.min.time()
+    if "birth_date" in patient_data and isinstance(patient_data["birth_date"], date):
+        patient_data["birth_date"] = datetime.combine(
+            patient_data["birth_date"], datetime.min.time()
         )
 
-    # Verifique se o campo 'address' está presente
-    if "address" not in patient_data or not patient_data["address"]:
-        raise HTTPException(status_code=400, detail="Address field is required")
+    patient_data["register_date"] = datetime.now()
 
+    logger.debug(f"Patient data to be inserted: {patient_data}")
     patient = await patients_collection.insert_one(patient_data)
     new_patient = await patients_collection.find_one({"_id": patient.inserted_id})
+    logger.info(f"Patient added successfully with ID: {patient.inserted_id}")
     return patient_helper(new_patient)
 
 
 async def get_patient(id: str) -> dict:
-    patients_collection = await get_patients_collection()
+    logger.info(f"Fetching patient with ID: {id}")
+    patients_collection = await get_pacientes_collection()
     patient = await patients_collection.find_one({"_id": ObjectId(id)})
     if patient:
+        logger.info(f"Patient found: {patient}")
         return patient_helper(patient)
+    logger.warning(f"Patient not found for ID: {id}")
     return None
 
 
-async def get_all_patients():
-    patients_collection = await get_patients_collection()
+async def get_all_patients() -> list:
+    logger.info("Fetching all patients.")
+    patients_collection = await get_pacientes_collection()
+    patients_cursor = patients_collection.find()
     patients = []
-    async for patient in patients_collection.find():
+    async for patient in patients_cursor:
         patients.append(patient_helper(patient))
-    return patients
-
-
-async def get_patients_by_doctor_id(doctor_id: str):
-    patients_collection = await get_patients_collection()
-    patients = []
-    async for patient in patients_collection.find({"doctor_id": doctor_id}):
-        patients.append(patient_helper(patient))
+    logger.info(f"Fetched {len(patients)} patients.")
     return patients
 
 
 async def update_patient(id: str, patient_data: dict):
-    patients_collection = await get_patients_collection()
+    logger.info(f"Updating patient with ID: {id}")
+    patients_collection = await get_pacientes_collection()
 
-    # Convertendo a data de nascimento para datetime
-    if "birthdate" in patient_data and isinstance(patient_data["birthdate"], str):
-        patient_data["birthdate"] = datetime.strptime(
-            patient_data["birthdate"], "%Y-%m-%d"
-        )
-    elif "birthdate" in patient_data and isinstance(patient_data["birthdate"], date):
-        patient_data["birthdate"] = datetime.combine(
-            patient_data["birthdate"], datetime.min.time()
-        )
+    try:
+        if "birth_date" in patient_data:
+            patient_data["birth_date"] = datetime.strptime(
+                patient_data["birth_date"], "%Y-%m-%d"
+            )
 
-    if len(patient_data) < 1:
-        return False
-    patient = await patients_collection.find_one({"_id": ObjectId(id)})
-    if patient:
-        updated_patient = await patients_collection.update_one(
+        if not patient_data:
+            logger.warning("No valid data provided for update.")
+            return False
+
+        logger.debug(f"Patient update data: {patient_data}")
+        result = await patients_collection.update_one(
             {"_id": ObjectId(id)}, {"$set": patient_data}
         )
-        if updated_patient:
+        if result.modified_count > 0:
+            logger.info(f"Patient updated successfully with ID: {id}")
             return True
-    return False
+        logger.warning(f"No updates performed for patient ID: {id}")
+        return False
+
+    except Exception as e:
+        logger.error(f"Error updating patient: {e}")
+        return False
 
 
 async def delete_patient(id: str):
-    patients_collection = await get_patients_collection()
-    patient = await patients_collection.find_one({"_id": ObjectId(id)})
-    if patient:
-        await patients_collection.delete_one({"_id": ObjectId(id)})
-        return True
-    return False
+    logger.info(f"Deleting patient with ID: {id}")
+    patients_collection = await get_pacientes_collection()
+    result = await patients_collection.delete_one({"_id": ObjectId(id)})
+    if result.deleted_count > 0:
+        logger.info(f"Patient deleted successfully with ID: {id}")
+    else:
+        logger.warning(f"Patient not found for deletion with ID: {id}")
+    return result.deleted_count > 0

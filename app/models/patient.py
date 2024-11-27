@@ -1,27 +1,37 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
-class PatientModel(BaseModel):
-    name: str = Field(..., example="João Silva")
-    birthdate: date = Field(..., example="1985-12-25")
-    address: Optional[str] = Field(
-        None, example="Rua das Flores, 123"
-    )  # Tornar opcional
-    cpf: str = Field(..., example="123.456.789-00")
-    phone: str = Field(..., example="(12) 34567-8901")
-    doctor_id: str = Field(..., example="29329392929")
+class EnderecoSchema(BaseModel):
+    street: str
+    city: str
+    state: str
+    cep: str
+    number: str
+
+
+class PatientSchema(BaseModel):
+    name: str
+    birth_date: str
+    gender: str
+    cpf: str
+    contact: str
+    address: EnderecoSchema
+    register_date: Optional[datetime] = datetime.now()
 
     class Config:
-        json_schema_extra = {
-            "example": {
-                "name": "João Silva",
-                "birthdate": "1985-12-25",
-                "address": "Rua das Flores, 123",
-                "cpf": "123.456.789-00",
-                "phone": "(12) 34567-8901",
-                "doctor_id": "29329392929",
-            }
-        }
+        from_attributes = True
+
+
+class UpdatePatientSchema(BaseModel):
+    name: Optional[str]
+    birth_date: Optional[str]
+    gender: Optional[str]
+    cpf: Optional[str]
+    contact: Optional[str]
+    address: Optional[EnderecoSchema]
+
+    class Config:
+        from_attributes = True
