@@ -4,7 +4,7 @@ from typing import List, Optional
 from bson import ObjectId
 from pydantic import BaseModel, Field
 
-from app.models.custom_object_id import PyObjectId
+from app.models.utils.custom_object_id import PyObjectId
 
 
 class GravacaoSchema(BaseModel):
