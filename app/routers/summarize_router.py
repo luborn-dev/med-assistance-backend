@@ -25,19 +25,16 @@ async def summarize(request: SummarizeRequest = Body(...)):
                 status_code=400, detail="The 'sumarizacoes' field cannot be empty."
             )
 
-        full_text = "\n".join(request.sumarizacoes)
+        response_model = await summarize_transcription(request.sumarizacoes)
 
-        prompt = pre_processing_summarize.gerar_prompt_para_historico_medico(full_text)
-
-        text = await summarize_transcription(prompt)
-        if not text:
+        if not response_model:
             raise HTTPException(
                 status_code=500, detail="Summarization returned an empty response."
             )
 
-        logger.info(f"Summarization successful: {text}")
+        logger.info(f"Summarization successful: {response_model}")
         return JSONResponse(
-            content=text,
+            content=response_model,
             media_type="application/json; charset=utf-8",
         )
 
