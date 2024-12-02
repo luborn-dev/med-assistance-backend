@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from bson import ObjectId
 from pydantic import BaseModel, Field
@@ -15,7 +15,7 @@ class GravacaoSchema(BaseModel):
     tipo: str
     procedimento: str
     transcricao: Optional[str] = None
-    sumarizacao: Optional[str] = None
+    sumarizacao: Optional[Dict[str, Any]] = None
 
     class Config:
         arbitrary_types_allowed = True

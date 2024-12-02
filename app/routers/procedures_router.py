@@ -134,7 +134,7 @@ async def create_gravacao_with_audio(
 
     try:
         prompt = pre_processing_summarize.gerar_prompt_para_sumarizacao(text)
-        summarize = await summarize_transcription(prompt)
+        summarize = await summarize_transcription(prompt, "medical_procedure")
         logger.info(f"Summarization generated successfully.")
     except Exception as e:
         logger.error(f"Error during summarization: {e}")

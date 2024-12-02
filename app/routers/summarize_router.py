@@ -25,7 +25,18 @@ async def summarize(request: SummarizeRequest = Body(...)):
                 status_code=400, detail="The 'sumarizacoes' field cannot be empty."
             )
 
-        response_model = await summarize_transcription(request.sumarizacoes)
+        full_text = "\n\n".join(
+            f"- **Sintomas e Queixas**: {item.get('symptoms_and_complaints', '')}\n"
+            f"- **Histórico Médico**: {item.get('medical_history', '')}\n"
+            f"- **Diagnóstico**: {item.get('diagnosis', '')}\n"
+            f"- **Tratamentos e Procedimentos**: {item.get('treatments_and_procedures', '')}\n"
+            f"- **Recomendações**: {item.get('recommendations', '')}\n"
+            for item in request.sumarizacoes
+        )
+
+        print(full_text)
+
+        response_model = await summarize_transcription(full_text, "medical_history")
 
         if not response_model:
             raise HTTPException(
